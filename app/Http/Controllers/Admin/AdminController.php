@@ -12,7 +12,7 @@ class AdminController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
         //加载后台模板
@@ -83,5 +83,12 @@ class AdminController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function form(Request $request)
+    {
+        //
+        //加载后台模板
+        return view("Admin.Admin.form");
     }
 }

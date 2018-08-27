@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
+
+use Role;
+//导入Hash类
 use Hash;
+//导入校验类
 use App\Http\Requests\UserInsert;
 class UsersController extends Controller
 {
@@ -14,13 +18,9 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $Request)
+    public function index()
     {
-        // echo "这是Users列表";
-        //加载模板
-        $k = $Request->input('keywords');
-        $user = DB::table('users')->where('name','like',"%".$k."%")->paginate(3);
-        return view("Admin.Users.index",['user'=>$user,'request'=>$Request->all()]);
+        return view('Admin.Admin.shop');
     }
 
     /**
@@ -31,8 +31,8 @@ class UsersController extends Controller
     public function create()
     {
         //添加界面
-        // echo "this is add";
-        return view("Admin.Users.add");
+        //echo "this is add";
+        return view("Admins.Users.add");
         
     }
 
@@ -44,18 +44,17 @@ class UsersController extends Controller
      */
     public function store(UserInsert $request)
     {
-        //执行添加
-        // echo "这是执行添加操作";
-        // var_dump($request->all());
-        $data = $request->except('_token','repass');
-        $data['pass'] = Hash::make($data['pass']);
-
-        if (DB::table('users')->insert($data)) {
-            return redirect('/adminusers')->with('success','数据添加成功');
+        //dd($request->all());
+        $data=$request->except(['repassword','_token','phone']);
+        //对密码做加密
+        $data['password']=Hash::make($data['password']);
+        //dd($data);
+        if(DB::table("stu")->insert($data)){
+            return redirect("/uu")->with('success','数据添加成功');
         }else{
-            return redirect('/adminusers/create')->with('error','数据添加失败');
+            return redirect("/uu/create")->with('error','数据添加失败');
         }
-        
+
     }
 
     /**
@@ -78,9 +77,10 @@ class UsersController extends Controller
     public function edit($id)
     {
         // echo "这是修改数据的id:".$id;
-        $user = DB::table('users')->where('id','=',$id)->first();
-        // var_dump($user);die;
-        return view('Admin.Users.edit',['user'=>$user]);
+        //获取需要修改的数据
+        $user=DB::table("stu")->where("id",'=',$id)->first();
+        return view("Admin.Users.edit",['user'=>$user]);
+
     }
 
     /**
@@ -94,13 +94,14 @@ class UsersController extends Controller
     //执行修改
     public function update(Request $request, $id)
     {
-        $all = $request->all();
-        // var_dump($all);die;
-        $data = $request->except('_token','repass','_method');
-        if (DB::table('users')->where('id','=',$id)->update($data)) {
-            return redirect('/adminusers')->with('success','修改成功');
+       // dd($request->all());
+        $data=$request->except(['_token','_method']);
+        //密码加密
+        $data['password']=Hash::make($data['password']);
+        if(DB::table("stu")->where("id","=",$id)->update($data)){
+            return redirect("/adminusers")->with('success',"修改成功");
         }else{
-            return redirect('/adminusers')->with('error','修改失败');
+            return redirect("/adminusers/$id",'数据修改失败');
         }
     }
 
@@ -112,19 +113,19 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $de = DB::table('users')->where('id','=',$id)->delete();
-        if ($de) {
-            return redirect('/adminusers')->with('success','删除成功');
+        // echo $id;
+        if(DB::table("stu")->where("id",'=',$id)->delete()){
+            return redirect("/adminusers")->with('success','数据删除成功');
         }else{
-            return redirect('/adminusers')->with('error','删除失败');
+            return redirect("/adminusers")->with('error','数据删除失败');
         }
     }
 
-    public function del(Request $request)
-    {
-        $id = $request->input('id');
-        $res = DB::table("users")->where('id','=',$id)->delete();
-        if ($res) {
+    //删除
+    public function del(Request $request){
+        $id=$request->input('id');
+        // echo $id;
+        if(DB::table("stu")->where("id",'=',$id)->delete()){
             echo 1;
         }else{
             echo 0;
